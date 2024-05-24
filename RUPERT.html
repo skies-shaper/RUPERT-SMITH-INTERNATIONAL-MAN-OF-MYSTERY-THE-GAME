@@ -1,0 +1,74 @@
+<!doctype HTML>
+<html>
+<head>
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <style>
+        body{ 
+            background-color: slategray;
+            font-family: verdana;
+            margin: none;
+        }
+        #gamebox {
+            margin-left: calc(50% - 250px);
+            margin-top: calc(50vh - 175px);
+        }
+        h1 {
+            max-width: 500px;
+            width: 500px;
+            font-size: 30px;
+        }
+        #menu {
+            height: 50px;
+            background-color: black;
+            margin: none;
+        }
+        
+    </style>
+
+</head>
+<body>
+    <div id="menu">I'm sticking a menu up here for the future</div>
+    <div id="gamebox">
+    <h1>RUPERT SMITH, INTERNATIONAL MAN OF MYSTERY: The Game</h1>
+        <canvas id="gamewindow" width="500" height="300">
+            Game content :)
+        </canvas>
+    </div>
+    <script src="gameloop.js"></script>
+    <!--The following div element holds all of the image data for the game :D ufortunately it is very long. Don't put anything below this ok?-->
+    <div style="display:none;">
+        <img id="menuContinue" src="menu-continue.png" width="16" height="16"/>
+        <img id="menuOptions" src="menu-options.png" width="16" height="16"/>
+        <img id="menuContinueHover" src="menu-continue-hover.png" width="16" height="16"/>
+        <img id="menuOptionsHover" src="menu-options-hover.png" width="16" height="16"/>
+         <!--Here, put the texture images for tiles :)-->
+        <img id="brick-1" src="textures/brick-1.png"/>
+        <img id="brick-2" src="textures/brick-2.png"/>
+        <img id="brick-3" src="textures/brick-3.png"/>
+        <img id="cobble-2" src="textures/cobble-1.png"/>
+        <img id="cobble-3" src="textures/cobble-2.png"/>
+        <img id="cobble-1" src="textures/cobble.png"/>        
+        <!--End area for texture files-->
+        <!--RUPERT SMITH walk cycle-->
+        <img id="RUPERT_0" src="textures/Rupert/pixil-frame-0.png"/>
+        <img id="RUPERT_1" src="textures/Rupert/pixil-frame-1.png"/>
+        <img id="RUPERT_2" src="textures/Rupert/pixil-frame-2.png"/>
+        <img id="RUPERT_3" src="textures/Rupert/pixil-frame-3.png"/>
+        <img id="RUPERT_4" src="textures/Rupert/pixil-frame-4.png"/>
+        <img id="RUPERT_5" src="textures/Rupert/pixil-frame-5.png"/>
+        <img id="RUPERT_6" src="textures/Rupert/pixil-frame-6.png"/>
+        <img id="RUPERT_7" src="textures/Rupert/pixil-frame-7.png"/>
+        <img id="RUPERT_8" src="textures/Rupert/pixil-frame-8.png"/>
+        <img id="RUPERT_9" src="textures/Rupert/pixil-frame-9.png"/>
+        <!--end that nonsense right here amiright-->
+    </div>
+</body>
+</html>
