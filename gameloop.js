@@ -16,7 +16,7 @@ let DIRECTION_RIGHT = 0
 let DIRECTION_UP = 2
 let DIRECTION_DOWN = 3
 let RUPERTFRAME = 0, RUPERTANIMATIONOFFSET = 0
-let level
+let level, LEVEL
 let isPaused = false;
 const gamescreen = document.getElementById("gamewindow").getContext("2d")
 let mouseX = -1
@@ -31,6 +31,7 @@ let spawn
 let DEBUG_showMouse = false
 let DEBUG_showHitboxes = false
 let MOVING = false
+let isMainMenu = false
 preInit()
 
 function point(xpos,ypos)
@@ -114,7 +115,7 @@ function generateMap(width, height)
 }
 
 function gameInit(){
-    mainMenu = true
+    isMainMenu = true
     isPaused = true
     setInterval(gameloop,(1000/60))
 }
@@ -137,7 +138,7 @@ function gameloop(){
     renderScreen()
     if(isPaused)
     {
-        if(mainMenu)
+        if(isMainMenu)
         {
             mainMenu()
             return
@@ -149,9 +150,26 @@ function gameloop(){
     
 }
 
+function BUTTon(x,y,text,){ //lol butts
+
+}
+
 function mainMenu()
 {
     gamescreen.drawImage(document.getElementById("titlescreen"),0,0,500,300)
+    if(mouseX>20 && mouseX<149 && mouseY>210 && mouseY<264)
+    {
+        gamescreen.filter = "brightness(1.5)"
+        if(mouseDown)
+        {
+            mainMenu = false
+            isPaused = false
+            LEVEL = 1
+        }
+    }
+    gamescreen.drawImage(document.getElementById("mainmenu-begin"),20,210,129,54)
+    gamescreen.filter = "none"
+
 }
 
 function gameLogic()
@@ -234,8 +252,8 @@ function renderScreen()
     gamescreen.fillStyle = "white" 
     //text
     if(DEBUG_showMouse) {
-    gamescreen.fillText(mouseX,50,50)
-    gamescreen.fillText(mouseY,50,70)
+        gamescreen.fillText(mouseX,50,50)
+        gamescreen.fillText(mouseY,50,70)
     }
     
     //background
@@ -296,20 +314,18 @@ window.onload = function(){
 function pauseMenu()
 {
     if(mouseX>178 && mouseX<322 && mouseY > 132 && mouseY < 170){
-        gamescreen.drawImage(document.getElementById("menuContinueHover"),178,132,144,36)
+        gamescreen.filter = "brightness(1.5)"
         if(mouseDown)
         {
             isPaused = false
         }
     }
-    else{
-        gamescreen.drawImage(document.getElementById("menuContinue"),178,132,144,36)
-    }
+    gamescreen.drawImage(document.getElementById("menuContinue"),178,132,144,36)
+    gamescreen.filter = "none"
 
     if(mouseX>185 && mouseX<315 && mouseY > 182 && mouseY < 220){
-        gamescreen.drawImage(document.getElementById("menuOptionsHover"),185,182,130,36)    }
-    else{
-        gamescreen.drawImage(document.getElementById("menuOptions"),185,182,130,36)    }
-    
-   
+        gamescreen.filter = "brightness(1.5)"
+    }
+    gamescreen.drawImage(document.getElementById("menuOptions"))
+    gamescreen.filter = "none"
 }
