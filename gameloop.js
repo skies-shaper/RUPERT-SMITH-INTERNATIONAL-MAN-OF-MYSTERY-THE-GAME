@@ -56,7 +56,12 @@ document.getElementById("gamewindow").addEventListener("mouseup",()=>{
     mouseDown = false;
 })
 window.addEventListener("keydown",(event)=>{
+    if(isPaused)
+    {
+        return
+    }
     userKeys[event.key] = true;
+
     if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].indexOf(event.key)>-1)
     {
         MOVING = true;
@@ -75,6 +80,10 @@ window.addEventListener("keydown",(event)=>{
     }
 })
 window.addEventListener("keyup",(event)=>{
+    if(isPaused)
+    {
+        return
+    }
     userKeys[event.key] = false;
     if(!(userKeys["ArrowLeft"]||userKeys["ArrowRight"]||userKeys["ArrowDown"]||userKeys["ArrowUp"]))
     {
@@ -105,13 +114,14 @@ function generateMap(width, height)
 }
 
 function gameInit(){
-  
+    mainMenu = true
+    isPaused = true
     setInterval(gameloop,(1000/60))
 }
 
 function gameStart()
 {
-
+    
 }
 
 function gameloop(){
@@ -127,11 +137,21 @@ function gameloop(){
     renderScreen()
     if(isPaused)
     {
+        if(mainMenu)
+        {
+            mainMenu()
+            return
+        }
         pauseMenu()
     }
     
     //gamescreen.drawImage(document.getElementById("roadtile"),32,32,48,48)
     
+}
+
+function mainMenu()
+{
+    gamescreen.drawImage(document.getElementById("titlescreen"),0,0,500,300)
 }
 
 function gameLogic()
