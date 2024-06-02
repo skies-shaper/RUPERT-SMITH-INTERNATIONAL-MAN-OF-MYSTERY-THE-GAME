@@ -10,6 +10,10 @@ let TILES = [
     {img: "brick-3", collision:1 }
 
 ]
+let DAMAGE = {
+    FIRE:0,
+    ENERGY:1
+}
 let DIRECTION_LEFT = 1
 let DIRECTION
 let DIRECTION_RIGHT = 0
@@ -57,12 +61,23 @@ document.getElementById("gamewindow").addEventListener("mouseup",()=>{
     mouseDown = false;
 })
 window.addEventListener("keydown",(event)=>{
+    //key events that can occur on the main menu below this
+    if(isMainMenu)
+    {
+        return
+    }
+    //key events that can occur on the pause menu below this
+    if(event.key == "Escape")
+    {
+        isPaused = !isPaused;
+    }
+
     if(isPaused)
     {
         return
     }
+    //Key events that modify the game below this
     userKeys[event.key] = true;
-
     if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].indexOf(event.key)>-1)
     {
         MOVING = true;
@@ -75,10 +90,7 @@ window.addEventListener("keydown",(event)=>{
     {
         DIRECTION = DIRECTION_RIGHT
     }
-    if(event.key == "Escape")
-    {
-        isPaused = true;
-    }
+    
 })
 window.addEventListener("keyup",(event)=>{
     if(isPaused)
@@ -138,14 +150,17 @@ function gameloop(){
     renderScreen()
     if(isPaused)
     {
+
         if(isMainMenu)
         {
             mainMenu()
             return
         }
+
         pauseMenu()
     }
-    
+    gamescreen.fillText(isMainMenu,50,70)
+
     //gamescreen.drawImage(document.getElementById("roadtile"),32,32,48,48)
     
 }
@@ -162,7 +177,7 @@ function mainMenu()
         gamescreen.filter = "brightness(1.5)"
         if(mouseDown)
         {
-            mainMenu = false
+            isMainMenu = false
             isPaused = false
             LEVEL = 1
         }
@@ -303,9 +318,33 @@ function renderScreen()
     
 }
 
-function entity(width, height)
+function entity()
 {
-    return {width, height}
+    return {
+        imgsrc:"ERROR",
+        width:0,
+        height:0,
+        attacks:[],
+        mvmntAI:{},
+        name:"",
+        vulnerabilities:[],
+        immunities:[],
+        resistances:[]
+    }
+}
+
+function attack(){
+    return {
+        damage:{
+            randBoundLow:0,
+            randBoundHigh:6,
+            randBoundMult:1,
+            randBoundModf:0
+        },
+        cooldown:1000,
+        //cooldown is in ms
+        damagetypes: []
+    }
 }
 window.onload = function(){
     gameInit()
@@ -313,6 +352,7 @@ window.onload = function(){
 
 function pauseMenu()
 {
+    gamescreen.filter = "none"
     if(mouseX>178 && mouseX<322 && mouseY > 132 && mouseY < 170){
         gamescreen.filter = "brightness(1.5)"
         if(mouseDown)
@@ -326,6 +366,7 @@ function pauseMenu()
     if(mouseX>185 && mouseX<315 && mouseY > 182 && mouseY < 220){
         gamescreen.filter = "brightness(1.5)"
     }
-    gamescreen.drawImage(document.getElementById("menuOptions"))
+    gamescreen.drawImage(document.getElementById("menuOptions"),178,182,144,36)
     gamescreen.filter = "none"
 }
+
