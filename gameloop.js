@@ -83,11 +83,11 @@ window.addEventListener("keydown",(event)=>{
     {
         MOVING = true;
     }
-    if("ArrowLeft"==event.key)
+    if("ArrowLeft"==event.key||"a"==event.key)
     {
         DIRECTION = DIRECTION_LEFT
     }
-    if("ArrowRight" == event.key)
+    if("ArrowRight" == event.key||"d"==event.key)
     {
         DIRECTION = DIRECTION_RIGHT
     }
