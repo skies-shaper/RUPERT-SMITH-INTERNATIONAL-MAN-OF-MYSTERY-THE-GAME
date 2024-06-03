@@ -14,6 +14,7 @@ let DAMAGE = {
     FIRE:0,
     ENERGY:1
 }
+let targetX = 0, targetY = 0
 let DIRECTION_LEFT = 1
 let DIRECTION
 let DIRECTION_RIGHT = 0
@@ -78,7 +79,7 @@ window.addEventListener("keydown",(event)=>{
     }
     //Key events that modify the game below this
     userKeys[event.key] = true;
-    if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].indexOf(event.key)>-1)
+    if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","w","a","s","d"].indexOf(event.key)>-1)
     {
         MOVING = true;
     }
@@ -121,7 +122,7 @@ function generateMap(width, height)
     for (let i = 0; i < height; i++) {
         level.push([])
         for(let j = 0; j<width; j++) {
-            level[i].push(Math.floor(Math.random()*5))
+            level[i].push(Math.floor((Math.random()*5)+1))
         }        
     }
 }
@@ -159,7 +160,7 @@ function gameloop(){
 
         pauseMenu()
     }
-    gamescreen.fillText(isMainMenu,50,70)
+    gamescreen.fillText(targetX+", "+targetY,50,70)
 
     //gamescreen.drawImage(document.getElementById("roadtile"),32,32,48,48)
     
@@ -199,10 +200,10 @@ function gameLogic()
     
     
 
-    if(userKeys["ArrowLeft"])
+    if(userKeys["ArrowLeft"]||userKeys["a"])
     {
         cameraX += PLAYERSPEED
-        if(userKeys["ArrowDown"]||userKeys["ArrowUp"]){
+        if(userKeys["ArrowDown"]||userKeys["ArrowUp"]||userKeys["w"]||userKeys["s"]){
             cameraX = oldX
             cameraX +=PLAYERSPEED/Math.sqrt(2)
         }
@@ -210,10 +211,10 @@ function gameLogic()
             cameraX = oldX
         }
     }
-    if(userKeys["ArrowRight"])
+    if(userKeys["ArrowRight"]||userKeys["d"])
     {
         cameraX -= PLAYERSPEED
-        if(userKeys["ArrowDown"]||userKeys["ArrowUp"]){
+        if(userKeys["ArrowDown"]||userKeys["ArrowUp"]||userKeys["w"]||userKeys["s"]){
             cameraX = oldX
             cameraX -=PLAYERSPEED/Math.sqrt(2)
         }
@@ -223,10 +224,10 @@ function gameLogic()
 
     }
     
-    if(userKeys["ArrowDown"])
+    if(userKeys["ArrowDown"]||userKeys["s"])
     {
         cameraY -= PLAYERSPEED
-        if(userKeys["ArrowLeft"]||userKeys["ArrowRight"]){
+        if(userKeys["ArrowLeft"]||userKeys["ArrowRight"]||userKeys["a"]||userKeys["d"]){
             cameraY = oldY
             cameraY -=PLAYERSPEED/Math.sqrt(2)
         }
@@ -234,10 +235,10 @@ function gameLogic()
             cameraY = oldY
         }
     }
-    if(userKeys["ArrowUp"])
+    if(userKeys["ArrowUp"]||userKeys["w"])
     {
         cameraY += PLAYERSPEED
-        if(userKeys["ArrowLeft"]||userKeys["ArrowRight"]){
+        if(userKeys["ArrowLeft"]||userKeys["ArrowRight"]||userKeys["a"]||userKeys["d"]){
             cameraY = oldY
             cameraY +=PLAYERSPEED/Math.sqrt(2)
         }
@@ -270,17 +271,29 @@ function renderScreen()
         gamescreen.fillText(mouseX,50,50)
         gamescreen.fillText(mouseY,50,70)
     }
-    
+    let targetXs, targetYs
     //background
     for(let i = 0; i<currentlevelHeight; i++)
     {
         for(let j=0; j<currentlevelWidth; j++)
         {
             if(level[i][j] > 0){
-                gamescreen.drawImage(document.getElementById(TILES[level[i][j]]["img"]),Math.round(cameraX+(j*48)),Math.round(cameraY+(i*48)),48,48)
+                let tx = Math.round(cameraX+(j*48))
+                let ty = Math.round(cameraY+(i*48))
+                gamescreen.drawImage(document.getElementById(TILES[level[i][j]]["img"]),tx,ty,48,48)
+                if(tx < mouseX && (tx+48)>mouseX && ty<mouseY && (ty+48)>mouseY){
+                    targetX = j
+                    targetY = i
+                    targetXs = tx
+                    targetYs = ty
+
+                }
             }            
         }
     }
+    gamescreen.strokeStyle = "yellow"
+    gamescreen.lineWidth = 3
+    gamescreen.strokeRect(targetXs,targetYs,48,48)
     //entities handling :P
     RUPERTANIMATIONOFFSET++
     if(RUPERTANIMATIONOFFSET%3==0)
