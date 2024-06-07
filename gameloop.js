@@ -1,5 +1,36 @@
 let playerX, playerY, cameraX, cameraY, score, imgData3, currentlevelWidth, currentlevelHeight
-let LEVELS = []
+let logs = []
+let inventory = [[1,0,0],[0,0,0],[0,0,0],[0,0,0]]
+let clickType = 0
+let items = [
+    "empty",
+    "sword",
+    "dagger",
+    "gonne"
+]
+let hasClicked = []
+let LEVELS = [
+    {   
+        lvlid:1,
+        lvlname: "introduction",
+        lvldescription:"Welcome to the world",
+        lvlwidth:10,
+        lvlheight: 10,
+        lvlspawn: {x:3,y:3},
+        lvldata:[
+            [10,10,10,10,10,10,10,10,10,10],
+            [10,2,2,2,2,2,2,2,2,10],
+            [10,2,2,2,2,2,2,2,2,10],
+            [10,2,2,2,2,2,2,2,2,10],
+            [10,2,2,2,2,2,2,2,2,10],
+            [10,2,2,2,2,2,2,2,2,10],
+            [10,2,2,2,2,2,2,2,2,10],
+            [10,2,2,2,2,2,2,2,2,10],
+            [10,2,2,2,2,2,2,2,2,10],
+            [10,10,10,10,10,10,10,10,10,10]
+        ]
+    }
+]
 let TILES = [
     {img:"null",collision:1},
     {img: "cobble-1", collision:0 },
@@ -7,13 +38,18 @@ let TILES = [
     {img: "cobble-3", collision:0 },
     {img: "brick-1", collision:1 },
     {img: "brick-2", collision:1 },
-    {img: "brick-3", collision:1 }
-
+    {img: "brick-3", collision:1 },
+    {img: "stone", collision:1},
+    {img: "stone-1", collision:1},
+    {img: "stone-cracked", collision:1},
+    {img: "stone-wall", collision:1},
+    {img: "stone-wall-mossy", collision:1}
 ]
 let DAMAGE = {
     FIRE:0,
     ENERGY:1
 }
+let inventoryOpen = false
 let targetX = 0, targetY = 0
 let DIRECTION_LEFT = 1
 let DIRECTION
@@ -44,6 +80,10 @@ function point(xpos,ypos)
     return({x:xpos,y:ypos})
 }
 
+function giveplayer(item){
+    inventory.push(item)
+}
+
 function preInit()
 {
     spawn = point(27,-18)
@@ -55,11 +95,20 @@ document.getElementById("gamewindow").addEventListener("mousemove",(event)=>{
     mouseX = event.offsetX
     mouseY = event.offsetY
 })
-document.getElementById("gamewindow").addEventListener("mousedown",()=>{
+document.getElementById("gamewindow").addEventListener("mousedown",(event)=>{
     mouseDown = true;
+    clickType = event.button
+
 })
-document.getElementById("gamewindow").addEventListener("mouseup",()=>{
+// document.getElementById("gamewindow").addEventListener("click",(event)=>{
+//     clickX = event.offsetX;
+//     clickY = event.offsetY
+//     clickType = event.button
+
+// })
+document.getElementById("gamewindow").addEventListener("mouseup",(event)=>{
     mouseDown = false;
+    clickType = event.button
 })
 window.addEventListener("keydown",(event)=>{
     //key events that can occur on the main menu below this
@@ -91,7 +140,9 @@ window.addEventListener("keydown",(event)=>{
     {
         DIRECTION = DIRECTION_RIGHT
     }
-    
+    if(event.key=="i"){
+        inventoryOpen = !inventoryOpen
+    }
 })
 window.addEventListener("keyup",(event)=>{
     if(isPaused)
@@ -99,20 +150,9 @@ window.addEventListener("keyup",(event)=>{
         return
     }
     userKeys[event.key] = false;
-    if(!(userKeys["ArrowLeft"]||userKeys["ArrowRight"]||userKeys["ArrowDown"]||userKeys["ArrowUp"]))
+    if(!(userKeys["ArrowLeft"]||userKeys["ArrowRight"]||userKeys["ArrowDown"]||userKeys["ArrowUp"]||userKeys["w"]||userKeys["a"]||userKeys["s"]||userKeys["d"]))
     {
         MOVING = false;
-    }
-    if(event.key == "e")
-    {
-        generateMap(50,50)
-        cameraX = spawn.x
-        cameraY = spawn.y
-    }
-    if(event.key == "r")
-    {
-        cameraX = spawn.x
-        cameraY = spawn.y
     }
 })
 
@@ -131,6 +171,10 @@ function gameInit(){
     isMainMenu = true
     isPaused = true
     setInterval(gameloop,(1000/60))
+    RIGHTHAND= 0
+    LEFTHAND = 0
+    hasClicked["inventory-button"] = false
+
 }
 
 function gameStart()
@@ -180,7 +224,10 @@ function mainMenu()
         {
             isMainMenu = false
             isPaused = false
-            LEVEL = 1
+            LEVEL = 0
+            level = LEVELS[LEVEL].lvldata
+            currentlevelHeight = LEVELS[LEVEL].lvlheight
+            currentlevelWidth = LEVELS[LEVEL].lvlwidth
         }
     }
     gamescreen.drawImage(document.getElementById("mainmenu-begin"),20,210,129,54)
@@ -265,6 +312,7 @@ function gameLogic()
 
 function renderScreen()
 {   
+    gamescreen.imageSmoothingEnabled = false
     gamescreen.fillStyle = "white" 
     //text
     if(DEBUG_showMouse) {
@@ -281,16 +329,16 @@ function renderScreen()
                 let tx = Math.round(cameraX+(j*48))
                 let ty = Math.round(cameraY+(i*48))
                 gamescreen.drawImage(document.getElementById(TILES[level[i][j]]["img"]),tx,ty,48,48)
-                if(tx < mouseX && (tx+48)>mouseX && ty<mouseY && (ty+48)>mouseY){
+                if(tx <= mouseX && (tx+48)>mouseX && ty<=mouseY && (ty+48)>mouseY){
                     targetX = j
                     targetY = i
                     targetXs = tx
                     targetYs = ty
-
                 }
             }            
         }
     }
+
     gamescreen.strokeStyle = "yellow"
     gamescreen.lineWidth = 3
     gamescreen.strokeRect(targetXs,targetYs,48,48)
@@ -327,10 +375,61 @@ function renderScreen()
         gamescreen.strokeRect(223,131,42,42)
     }
     gamescreen.fillText(playerX+", "+playerY,50,50)
-
-    
+    for(let i = 0; i<Math.min(8,log.length);i++)
+    {
+        gamescreen.fillText(log[log.length-i],10,i*10)
+    }
+    //GUI
+    gamescreen.drawImage(document.getElementById("inventory-"+items[LEFTHAND]),400,250,36,36)
+    gamescreen.drawImage(document.getElementById("inventory-"+items[RIGHTHAND]),442,250,36,36)
+    if(inventoryOpen){
+        gamescreen.drawImage(document.getElementById("pocket-open"),346,250,36,36)
+    }
+    else{
+        gamescreen.drawImage(document.getElementById("pocket-closed"),346,250,36,36)
+    }
+    //inventory and other popups
+    gamescreen.fillStyle = "#bd9f6f"
+    gamescreen.strokeStyle = "#4d3422"
+    gamescreen.linewidth = 3
+    if(inventoryOpen){
+        gamescreen.fillRect(349,72,129,171)
+        gamescreen.strokeRect(348,71,129,171)
+        for(let i = 0; i<4; i++)
+        {
+            for(let j =0; j<3; j++){
+                if(mouseX>(353+(42*j))&&mouseX<(353+(42*j)+36)&& mouseY>(75+(42*i))&&mouseY<(75+(42*i)+36)){
+                    gamescreen.filter = "brightness(1.5)"
+                    
+                    if(mouseDown && !hasClicked["inventory-button"]){
+                        hasClicked["inventory-button"] = true
+                        if(clickType==0){
+                            let temp = LEFTHAND
+                            LEFTHAND = inventory[i][j]
+                            inventory[i][j] = temp 
+                        }
+                        if(clickType==2){
+                            let temp = RIGHTHAND
+                            RIGHTHAND = inventory[i][j]
+                            inventory[i][j] = temp
+                        }
+                    }
+                    if(!mouseDown)
+                    {
+                        hasClicked["inventory-button"] = false
+                    }
+                }
+                gamescreen.drawImage(document.getElementById("inventory-"+items[inventory[i][j]]),353+(42*j),75+(42*i),36,36)
+                gamescreen.filter = "none"
+                console.log(inventory[i][j])
+            }
+        }
+    }
 }
-
+function log(txt)
+{
+    logs.push(txt)
+}
 function entity()
 {
     return {
@@ -383,3 +482,7 @@ function pauseMenu()
     gamescreen.filter = "none"
 }
 
+function clearlog()
+{
+    logs =[]
+}
