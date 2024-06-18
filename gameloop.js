@@ -1,12 +1,46 @@
+let DAMAGE = {
+    FIRE:0,
+    ENERGY:1,
+    SLASH:2,
+    STAB: 3
+}
+let leftHandFree = true
+let rightHandFree = true
 let playerX, playerY, cameraX, cameraY, score, imgData3, currentlevelWidth, currentlevelHeight
 let logs = []
 let inventory = [[1,0,0],[0,0,0],[0,0,0],[0,0,0]]
 let clickType = 0
+let isShiftPressed = false
 let items = [
-    "empty",
-    "sword",
-    "dagger",
-    "gonne"
+    {name:"empty",attack:{
+        cooldown:0,
+        damage: {
+            min:0,
+            max:0,
+            mult:0
+        },
+        type: [],
+        range: 0
+    }},
+    {name:"sword",attack:{
+        cooldown:500,
+        damage: {
+            min:1,
+            max:6,
+            mult:1
+        },
+        type: [DAMAGE.SLASH],
+        range: 2,
+    },src: "items-shortsword"},
+    {name:"dagger",attack:{
+        cooldown:50,
+        damage:{
+            min:1,
+            max:4,
+            mult:1
+        },
+        type: [DAMAGE.STAB]
+    }},
 ]
 let hasClicked = []
 let LEVELS = [
@@ -45,10 +79,7 @@ let TILES = [
     {img: "stone-wall", collision:1},
     {img: "stone-wall-mossy", collision:1}
 ]
-let DAMAGE = {
-    FIRE:0,
-    ENERGY:1
-}
+
 let inventoryOpen = false
 let targetX = 0, targetY = 0
 let DIRECTION_LEFT = 1
@@ -73,6 +104,7 @@ let DEBUG_showMouse = false
 let DEBUG_showHitboxes = false
 let MOVING = false
 let isMainMenu = false
+
 preInit()
 
 function point(xpos,ypos)
@@ -98,6 +130,29 @@ document.getElementById("gamewindow").addEventListener("mousemove",(event)=>{
 document.getElementById("gamewindow").addEventListener("mousedown",(event)=>{
     mouseDown = true;
     clickType = event.button
+    if((isShiftPressed||event.button == 2) && rightHandFree){
+        attaaack(RIGHTHAND)
+        if(RIGHTHAND==0){
+            return
+        }
+        rightHandFree = false
+        
+        setTimeout(()=>{
+            rightHandFree = true
+        },items[RIGHTHAND].attack.cooldown)
+        return
+    }
+    if(event.button ==0 && leftHandFree)
+    {
+        attaaack(LEFTHAND)
+        if(LEFTHAND==0){
+            return
+        }
+        leftHandFree = false
+        setTimeout(()=>{
+            leftHandFree = true
+        },items[LEFTHAND].attack.cooldown)
+    }
 
 })
 // document.getElementById("gamewindow").addEventListener("click",(event)=>{
@@ -109,8 +164,12 @@ document.getElementById("gamewindow").addEventListener("mousedown",(event)=>{
 document.getElementById("gamewindow").addEventListener("mouseup",(event)=>{
     mouseDown = false;
     clickType = event.button
+    
 })
 window.addEventListener("keydown",(event)=>{
+    if(event.key == "Shift"){
+        isShiftPressed = true
+    }
     //key events that can occur on the main menu below this
     if(isMainMenu)
     {
@@ -140,11 +199,14 @@ window.addEventListener("keydown",(event)=>{
     {
         DIRECTION = DIRECTION_RIGHT
     }
-    if(event.key=="i"){
+    if(event.key=="e"){
         inventoryOpen = !inventoryOpen
     }
 })
 window.addEventListener("keyup",(event)=>{
+    if(event.key == "Shift"){
+        isShiftPressed = false
+    }
     if(isPaused)
     {
         return
@@ -338,7 +400,7 @@ function renderScreen()
             }            
         }
     }
-
+    
     gamescreen.strokeStyle = "yellow"
     gamescreen.lineWidth = 3
     gamescreen.strokeRect(targetXs,targetYs,48,48)
@@ -367,9 +429,14 @@ function renderScreen()
     {
         gamescreen.drawImage(document.getElementById("RUPERT_0"),220,109,48,72)
     }
-    
-    gamescreen.restore()
 
+    if(LEFTHAND>0){
+        gamescreen.drawImage(document.getElementById(items[LEFTHAND].src),220,120,48,48)
+    }
+    gamescreen.restore()
+    
+    //log
+    
     if(DEBUG_showHitboxes){
         gamescreen.strokeStyle = "red"
         gamescreen.strokeRect(223,131,42,42)
@@ -380,8 +447,8 @@ function renderScreen()
         gamescreen.fillText(log[log.length-i],10,i*10)
     }
     //GUI
-    gamescreen.drawImage(document.getElementById("inventory-"+items[LEFTHAND]),400,250,36,36)
-    gamescreen.drawImage(document.getElementById("inventory-"+items[RIGHTHAND]),442,250,36,36)
+    gamescreen.drawImage(document.getElementById("inventory-"+items[LEFTHAND].name),400,250,36,36)
+    gamescreen.drawImage(document.getElementById("inventory-"+items[RIGHTHAND].name),442,250,36,36)
     if(inventoryOpen){
         gamescreen.drawImage(document.getElementById("pocket-open"),346,250,36,36)
     }
@@ -392,15 +459,18 @@ function renderScreen()
     gamescreen.fillStyle = "#bd9f6f"
     gamescreen.strokeStyle = "#4d3422"
     gamescreen.linewidth = 3
+    let hovereditem = ""
     if(inventoryOpen){
-        gamescreen.fillRect(349,72,129,171)
-        gamescreen.strokeRect(348,71,129,171)
+        gamescreen.fillRect(349,72,130,171)
+        gamescreen.strokeRect(348,71,130,171)
         for(let i = 0; i<4; i++)
         {
             for(let j =0; j<3; j++){
+                let ishovered = false
+
                 if(mouseX>(353+(42*j))&&mouseX<(353+(42*j)+36)&& mouseY>(75+(42*i))&&mouseY<(75+(42*i)+36)){
                     gamescreen.filter = "brightness(1.5)"
-                    
+                    hovereditem = items[inventory[i][j]]
                     if(mouseDown && !hasClicked["inventory-button"]){
                         hasClicked["inventory-button"] = true
                         if(clickType==0){
@@ -419,11 +489,14 @@ function renderScreen()
                         hasClicked["inventory-button"] = false
                     }
                 }
-                gamescreen.drawImage(document.getElementById("inventory-"+items[inventory[i][j]]),353+(42*j),75+(42*i),36,36)
+                gamescreen.drawImage(document.getElementById("inventory-"+items[inventory[i][j]].name),353+(42*j),75+(42*i),36,36)
                 gamescreen.filter = "none"
-                console.log(inventory[i][j])
+                gamescreen.fillStyle = "black"
             }
         }
+        gamescreen.fillText(hovereditem.name==undefined? "": hovereditem.name,mouseX,mouseY-5)
+        gamescreen.fillStyle = "black"
+
     }
 }
 function log(txt)
@@ -445,7 +518,7 @@ function entity()
     }
 }
 
-function attack(){
+function attack(damage,cooldown,damagetypes){
     return {
         damage:{
             randBoundLow:0,
@@ -485,4 +558,8 @@ function pauseMenu()
 function clearlog()
 {
     logs =[]
+}
+
+function attaaack(whichonehuh){
+    console.log(items[whichonehuh])
 }
